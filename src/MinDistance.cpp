@@ -5,6 +5,7 @@
 
 #include "Utils.hpp"
 #include "Vector3D.hpp"
+#include "Segment3D.hpp"
 #include "MinDistance.hpp"
 
 // ----------------------------------------------------------------------------------------------------
@@ -66,11 +67,11 @@ double getMinDistance(const Segment3D& seg1, const Segment3D& seg2)
     }
 
     // Closest points on segments
-    const auto ptClosest1 = vecDir1 * t + seg1.getStart();
-    const auto ptClosest2 = vecDir2 * u + seg2.getStart();
+    const auto vecClosest1 = vecDir1 * t + seg1.getStart();
+    const auto vecClosest2 = vecDir2 * u + seg2.getStart();
 
     // Euclidean distance between the closest points
-    const Vector3D vecDistance(ptClosest1, ptClosest2);
+    const Vector3D vecDistance(vecClosest1, vecClosest2);
     const double result = std::sqrt(vecDistance.squaredNorm());
 
     return result;

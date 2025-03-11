@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "Point3D.hpp"
+#include "Segment3D.hpp"
 #include "MinDistance.hpp"
 
 // ----------------------------------------------------------------------------------------------------
