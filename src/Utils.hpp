@@ -10,7 +10,7 @@ namespace Utils
 {
     inline bool isZero(double value)
     {
-        constexpr double epsilon = 1e-9;
+        constexpr double epsilon = 1e-6;
         return (std::fabs(value) < epsilon);
     }
 }

@@ -1,80 +1,138 @@
 // ----------------------------------------------------------------------------------------------------
 
-#include <cmath>
-#include <algorithm>
-
 #include "Utils.hpp"
 #include "Vector3D.hpp"
 #include "Segment3D.hpp"
+#include "Matrix3x3.hpp"
 #include "MinDistance.hpp"
 
 // ----------------------------------------------------------------------------------------------------
 
 //
-// The shortest distance between two 3D line segments is given by the minimum distance between
-// any two points on the segments. This can be found by solving a system of equations that minimizes
-// the squared distance between points on the segments.
+// The algorithm is taken from here (and rewritten from Python to C++):
+// https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
 // 
-// Given two line segments:
-// 
-// 1. Segment 1:
-//    P1 + t * d1, where "P1" is the starting point, "d1 = P2 - P1" is the direction vector,
-//    and "t" is the parameter ranging from 0 to 1.
-//
-// 2. Segment 2:
-//    Q1 + u * d2, where "Q1" is the starting point, "d2 = Q2 - Q1" is the direction vector,
-//    and "u" is the parameter ranging from 0 to 1.
-// 
-// The squared distance function is:
-// 
-//   D ^ 2 = (||(P1 + t * d1) - (Q1 + u * d2)||) ^ 2
-// 
-// Minimizing this function leads to a system of two linear equations in two unknowns "t" and "u".
+// The online tests were carried out here:
+// http://ambrnet.com/TrigoCalc/Line3D/Distance2Lines3D_.htm
 //
 double getMinDistance(const Segment3D& seg1, const Segment3D& seg2)
 {
-    // Direction vectors of the segments
-    const Vector3D vecDir1(seg1.getStart(), seg1.getEnd());
-    const Vector3D vecDir2(seg2.getStart(), seg2.getEnd());
+    // Some constants
+    constexpr double Zero = 0.0;
 
-    // Vector between starting points
-    const Vector3D vecStartPts(seg1.getStart(), seg2.getStart());
+    // Calculate denominator
+    const Vector3D A(seg1.getStart(), seg1.getEnd());
+    const Vector3D B(seg2.getStart(), seg2.getEnd());
+    const double magA = A.norm();
+    const double magB = B.norm();
 
-    // Dot products
-    const double a = vecDir1.squaredNorm();
-    const double b = vecDir1.dotProduct(vecDir2);
-    const double c = vecDir2.squaredNorm();
-    const double d = vecDir1.dotProduct(vecStartPts);
-    const double e = vecDir2.dotProduct(vecStartPts);
+    const Vector3D _A = A / magA;
+    const Vector3D _B = B / magB;
 
-    // Denominator of the parameter equations
-    const double denom = a * c - b * b;
+    const Vector3D cross = _A.cross(_B);
+    const double denom = std::pow(cross.norm(), 2.0);
 
-    // Unknowns of equations
-    double t{};
-    double u{};
-
-    // If segments are nearly parallel, choose "t" as 0 and compute "u" from projection
+    // If lines are parallel ("denom" is zero), test if lines overlap.
+    // If they don't overlap, then there is a closest point solution.
+    // If they do overlap, there are infinite closest positions, but there is a closest distance.
     if (Utils::isZero(denom))
     {
-        t = 0.0;
-        u = std::clamp(e / c, 0.0, 1.0);
+        const double d0 = _A.dot(Vector3D(seg1.getStart(), seg2.getStart()));
+        const double d1 = _A.dot(Vector3D(seg1.getStart(), seg2.getEnd()));
+
+        // Is segment B before A?
+        if (d0 <= Zero && d1 <= Zero)
+        {
+            if (std::fabs(d0) < std::fabs(d1))
+            {
+                return Vector3D(seg2.getStart(), seg1.getStart()).norm();
+            }
+
+            return Vector3D(seg2.getEnd(), seg1.getStart()).norm();
+        }
+        // Is segment B after A?
+        else if (d0 >= magA && d1 >= magA)
+        {
+            if (std::fabs(d0) < std::fabs(d1))
+            {
+                return Vector3D(seg2.getStart(), seg1.getEnd()).norm();
+            }
+
+            return Vector3D(seg2.getEnd(), seg1.getEnd()).norm();
+        }
+
+        // Segments overlap, return distance between parallel segments
+        return (_A * d0 + seg1.getStart() - seg2.getStart()).norm();
     }
-    else
+
+    // Lines criss-cross - calculate the projected closest points
+    const Vector3D t(seg1.getStart(), seg2.getStart());
+    const double detA = Matrix3x3::determinant(t, _B, cross);
+    const double detB = Matrix3x3::determinant(t, _A, cross);
+
+    const double t0 = detA / denom;
+    const double t1 = detB / denom;
+
+    // Projected closest points on segments
+    Vector3D pA = _A * t0 + seg1.getStart();
+    Vector3D pB = _B * t1 + seg2.getStart();
+
+    // Clamp projections
     {
-        t = std::clamp((b * e - c * d) / denom, 0.0, 1.0);
-        u = std::clamp((a * e - b * d) / denom, 0.0, 1.0);
+        if (t0 < Zero)
+        {
+            pA = seg1.getStart();
+        }
+        else if (t0 > magA)
+        {
+            pA = seg1.getEnd();
+        }
+
+        if (t1 < Zero)
+        {
+            pB = seg2.getStart();
+        }
+        else if (t1 > magB)
+        {
+            pB = seg2.getEnd();
+        }
+
+        // Clamp projection A
+        if (t0 < Zero || t0 > magA)
+        {
+            double dot = _B.dot(pA - seg2.getStart());
+
+            if (dot < Zero)
+            {
+                dot = Zero;
+            }
+            else if (dot > magB)
+            {
+                dot = magB;
+            }
+
+            pB = _B * dot + seg2.getStart();
+        }
+
+        // Clamp projection B
+        if (t1 < Zero || t1 > magB)
+        {
+            double dot = _A.dot(pB - seg1.getStart());
+
+            if (dot < Zero)
+            {
+                dot = Zero;
+            }
+            else if (dot > magA)
+            {
+                dot = magA;
+            }
+
+            pA = _A * dot + seg1.getStart();
+        }
     }
 
-    // Closest points on segments
-    const auto vecClosest1 = vecDir1 * t + seg1.getStart();
-    const auto vecClosest2 = vecDir2 * u + seg2.getStart();
-
-    // Euclidean distance between the closest points
-    const Vector3D vecDistance(vecClosest1, vecClosest2);
-    const double result = std::sqrt(vecDistance.squaredNorm());
-
-    return result;
+    return (pA - pB).norm();
 }
 
 // ----------------------------------------------------------------------------------------------------
