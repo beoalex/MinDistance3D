@@ -14,8 +14,8 @@ class Vector3D
 public:
     Vector3D() = default;
     explicit Vector3D(double x, double y, double z);
-    explicit Vector3D(const Point3D& ptStart, const Point3D& ptEnd);
-    explicit Vector3D(const Vector3D& vecStart, const Vector3D& vecEnd);
+    explicit Vector3D(const Point3D& first, const Point3D& second);
+    explicit Vector3D(const Vector3D& first, const Vector3D& second);
 
     double operator[](unsigned int index) const;
 
@@ -45,17 +45,17 @@ inline Vector3D::Vector3D(double x, double y, double z)
 {
 }
 
-inline Vector3D::Vector3D(const Point3D& ptStart, const Point3D& ptEnd)
-    : m_x(ptEnd.getX() - ptStart.getX()),
-      m_y(ptEnd.getY() - ptStart.getY()),
-      m_z(ptEnd.getZ() - ptStart.getZ())
+inline Vector3D::Vector3D(const Point3D& first, const Point3D& second)
+    : m_x(second.x() - first.x()),
+      m_y(second.y() - first.y()),
+      m_z(second.z() - first.z())
 {
 }
 
-inline Vector3D::Vector3D(const Vector3D& vecStart, const Vector3D& vecEnd)
-    : m_x(vecEnd.m_x - vecStart.m_x),
-      m_y(vecEnd.m_y - vecStart.m_y),
-      m_z(vecEnd.m_z - vecStart.m_z)
+inline Vector3D::Vector3D(const Vector3D& first, const Vector3D& second)
+    : m_x(second.m_x - first.m_x),
+      m_y(second.m_y - first.m_y),
+      m_z(second.m_z - first.m_z)
 {
 }
 
@@ -90,17 +90,17 @@ inline Vector3D Vector3D::operator/(double scalar) const
 inline Vector3D Vector3D::operator+(const Point3D& point) const
 {
     return Vector3D(
-        this->m_x + point.getX(),
-        this->m_y + point.getY(),
-        this->m_z + point.getZ());
+        this->m_x + point.x(),
+        this->m_y + point.y(),
+        this->m_z + point.z());
 }
 
 inline Vector3D Vector3D::operator-(const Point3D& point) const
 {
     return Vector3D(
-        this->m_x - point.getX(),
-        this->m_y - point.getY(),
-        this->m_z - point.getZ());
+        this->m_x - point.x(),
+        this->m_y - point.y(),
+        this->m_z - point.z());
 }
 
 inline Vector3D Vector3D::operator-(const Vector3D& vector) const
@@ -113,9 +113,9 @@ inline Vector3D Vector3D::operator-(const Vector3D& vector) const
 
 inline Vector3D& Vector3D::operator=(const Point3D& point)
 {
-    m_x = point.getX();
-    m_y = point.getY();
-    m_z = point.getZ();
+    m_x = point.x();
+    m_y = point.y();
+    m_z = point.z();
 
     return *this;
 }

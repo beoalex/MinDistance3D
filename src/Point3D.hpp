@@ -10,9 +10,9 @@ public:
     Point3D() = default;
     explicit Point3D(double x, double y, double z);
 
-    double getX() const;
-    double getY() const;
-    double getZ() const;
+    double x() const;
+    double y() const;
+    double z() const;
 
 private:
     const double m_x{};
@@ -27,17 +27,17 @@ inline Point3D::Point3D(double x, double y, double z)
 {
 }
 
-inline double Point3D::getX() const
+inline double Point3D::x() const
 {
     return m_x;
 }
 
-inline double Point3D::getY() const
+inline double Point3D::y() const
 {
     return m_y;
 }
 
-inline double Point3D::getZ() const
+inline double Point3D::z() const
 {
     return m_z;
 }

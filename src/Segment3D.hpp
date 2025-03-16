@@ -10,31 +10,31 @@ class Segment3D
 {
 public:
     Segment3D() = default;
-    explicit Segment3D(const Point3D& ptStart, const Point3D& ptEnd);
+    explicit Segment3D(const Point3D& first, const Point3D& second);
 
-    const Point3D& getStart() const;
-    const Point3D& getEnd() const;
+    const Point3D& first() const;
+    const Point3D& second() const;
 
 private:
-    const Point3D m_ptStart{};
-    const Point3D m_ptEnd{};
+    const Point3D m_first{};
+    const Point3D m_second{};
 };
 
 // ----------------------------------------------------------------------------------------------------
 
-inline Segment3D::Segment3D(const Point3D& ptStart, const Point3D& ptEnd)
-    : m_ptStart(ptStart), m_ptEnd(ptEnd)
+inline Segment3D::Segment3D(const Point3D& first, const Point3D& second)
+    : m_first(first), m_second(second)
 {
 }
 
-inline const Point3D& Segment3D::getStart() const
+inline const Point3D& Segment3D::first() const
 {
-    return m_ptStart;
+    return m_first;
 }
 
-inline const Point3D& Segment3D::getEnd() const
+inline const Point3D& Segment3D::second() const
 {
-    return m_ptEnd;
+    return m_second;
 }
 
 // ----------------------------------------------------------------------------------------------------

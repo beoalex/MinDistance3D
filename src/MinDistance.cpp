@@ -21,8 +21,8 @@ double getMinDistance(const Segment3D& segA, const Segment3D& segB)
     constexpr double Zero = 0.0;
 
     // Calculate denominator
-    const Vector3D A(segA.getStart(), segA.getEnd());
-    const Vector3D B(segB.getStart(), segB.getEnd());
+    const Vector3D A(segA.first(), segA.second());
+    const Vector3D B(segB.first(), segB.second());
     const double magA = A.norm();
     const double magB = B.norm();
 
@@ -37,36 +37,36 @@ double getMinDistance(const Segment3D& segA, const Segment3D& segB)
     // If they do overlap, there are infinite closest positions, but there is a closest distance.
     if (Utils::isZero(denom))
     {
-        const double d0 = _A.dot(Vector3D(segA.getStart(), segB.getStart()));
-        const double d1 = _A.dot(Vector3D(segA.getStart(), segB.getEnd()));
+        const double d0 = _A.dot(Vector3D(segA.first(), segB.first()));
+        const double d1 = _A.dot(Vector3D(segA.first(), segB.second()));
 
         // Is segment B before A?
         if (d0 <= Zero && d1 <= Zero)
         {
             if (std::fabs(d0) < std::fabs(d1))
             {
-                return Vector3D(segB.getStart(), segA.getStart()).norm();
+                return Vector3D(segB.first(), segA.first()).norm();
             }
 
-            return Vector3D(segB.getEnd(), segA.getStart()).norm();
+            return Vector3D(segB.second(), segA.first()).norm();
         }
         // Is segment B after A?
         else if (d0 >= magA && d1 >= magA)
         {
             if (std::fabs(d0) < std::fabs(d1))
             {
-                return Vector3D(segB.getStart(), segA.getEnd()).norm();
+                return Vector3D(segB.first(), segA.second()).norm();
             }
 
-            return Vector3D(segB.getEnd(), segA.getEnd()).norm();
+            return Vector3D(segB.second(), segA.second()).norm();
         }
 
         // Segments overlap, return distance between parallel segments
-        return (_A * d0 + segA.getStart() - segB.getStart()).norm();
+        return (_A * d0 + segA.first() - segB.first()).norm();
     }
 
     // Lines criss-cross - calculate the projected closest points
-    const Vector3D t(segA.getStart(), segB.getStart());
+    const Vector3D t(segA.first(), segB.first());
     const double detA = Matrix3x3::determinant(t, _B, cross);
     const double detB = Matrix3x3::determinant(t, _A, cross);
 
@@ -74,33 +74,33 @@ double getMinDistance(const Segment3D& segA, const Segment3D& segB)
     const double t1 = detB / denom;
 
     // Projected closest points on segments
-    Vector3D pA = _A * t0 + segA.getStart();
-    Vector3D pB = _B * t1 + segB.getStart();
+    Vector3D pA = _A * t0 + segA.first();
+    Vector3D pB = _B * t1 + segB.first();
 
     // Clamp projections
     {
         if (t0 < Zero)
         {
-            pA = segA.getStart();
+            pA = segA.first();
         }
         else if (t0 > magA)
         {
-            pA = segA.getEnd();
+            pA = segA.second();
         }
 
         if (t1 < Zero)
         {
-            pB = segB.getStart();
+            pB = segB.first();
         }
         else if (t1 > magB)
         {
-            pB = segB.getEnd();
+            pB = segB.second();
         }
 
         // Clamp projection A
         if (t0 < Zero || t0 > magA)
         {
-            double dot = _B.dot(pA - segB.getStart());
+            double dot = _B.dot(pA - segB.first());
 
             if (dot < Zero)
             {
@@ -111,13 +111,13 @@ double getMinDistance(const Segment3D& segA, const Segment3D& segB)
                 dot = magB;
             }
 
-            pB = _B * dot + segB.getStart();
+            pB = _B * dot + segB.first();
         }
 
         // Clamp projection B
         if (t1 < Zero || t1 > magB)
         {
-            double dot = _A.dot(pB - segA.getStart());
+            double dot = _A.dot(pB - segA.first());
 
             if (dot < Zero)
             {
@@ -128,7 +128,7 @@ double getMinDistance(const Segment3D& segA, const Segment3D& segB)
                 dot = magA;
             }
 
-            pA = _A * dot + segA.getStart();
+            pA = _A * dot + segA.first();
         }
     }
 
