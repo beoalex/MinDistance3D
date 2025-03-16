@@ -17,12 +17,18 @@
 //
 double getMinDistance(const Segment3D& segA, const Segment3D& segB)
 {
-    // Some constants
+    // Shortcuts
+    const Point3D& a0 = segA.first();
+    const Point3D& a1 = segA.second();
+    const Point3D& b0 = segB.first();
+    const Point3D& b1 = segB.second();
+
+    // Constants
     constexpr double Zero = 0.0;
 
     // Calculate denominator
-    const Vector3D A(segA.first(), segA.second());
-    const Vector3D B(segB.first(), segB.second());
+    const Vector3D A(a0, a1);
+    const Vector3D B(b0, b1);
     const double magA = A.norm();
     const double magB = B.norm();
 
@@ -37,36 +43,36 @@ double getMinDistance(const Segment3D& segA, const Segment3D& segB)
     // If they do overlap, there are infinite closest positions, but there is a closest distance.
     if (Utils::isZero(denom))
     {
-        const double d0 = _A.dot(Vector3D(segA.first(), segB.first()));
-        const double d1 = _A.dot(Vector3D(segA.first(), segB.second()));
+        const double d0 = _A.dot(Vector3D(a0, b0));
+        const double d1 = _A.dot(Vector3D(a0, b1));
 
         // Is segment B before A?
         if (d0 <= Zero && d1 <= Zero)
         {
             if (std::fabs(d0) < std::fabs(d1))
             {
-                return Vector3D(segB.first(), segA.first()).norm();
+                return Vector3D(b0, a0).norm();
             }
 
-            return Vector3D(segB.second(), segA.first()).norm();
+            return Vector3D(b1, a0).norm();
         }
         // Is segment B after A?
         else if (d0 >= magA && d1 >= magA)
         {
             if (std::fabs(d0) < std::fabs(d1))
             {
-                return Vector3D(segB.first(), segA.second()).norm();
+                return Vector3D(b0, a1).norm();
             }
 
-            return Vector3D(segB.second(), segA.second()).norm();
+            return Vector3D(b1, a1).norm();
         }
 
         // Segments overlap, return distance between parallel segments
-        return (_A * d0 + segA.first() - segB.first()).norm();
+        return (_A * d0 + a0 - b0).norm();
     }
 
     // Lines criss-cross - calculate the projected closest points
-    const Vector3D t(segA.first(), segB.first());
+    const Vector3D t(a0, b0);
     const double detA = Matrix3x3::determinant(t, _B, cross);
     const double detB = Matrix3x3::determinant(t, _A, cross);
 
@@ -74,33 +80,33 @@ double getMinDistance(const Segment3D& segA, const Segment3D& segB)
     const double t1 = detB / denom;
 
     // Projected closest points on segments
-    Vector3D pA = _A * t0 + segA.first();
-    Vector3D pB = _B * t1 + segB.first();
+    Vector3D pA = _A * t0 + a0;
+    Vector3D pB = _B * t1 + b0;
 
     // Clamp projections
     {
         if (t0 < Zero)
         {
-            pA = segA.first();
+            pA = a0;
         }
         else if (t0 > magA)
         {
-            pA = segA.second();
+            pA = a1;
         }
 
         if (t1 < Zero)
         {
-            pB = segB.first();
+            pB = b0;
         }
         else if (t1 > magB)
         {
-            pB = segB.second();
+            pB = b1;
         }
 
         // Clamp projection A
         if (t0 < Zero || t0 > magA)
         {
-            double dot = _B.dot(pA - segB.first());
+            double dot = _B.dot(pA - b0);
 
             if (dot < Zero)
             {
@@ -111,13 +117,13 @@ double getMinDistance(const Segment3D& segA, const Segment3D& segB)
                 dot = magB;
             }
 
-            pB = _B * dot + segB.first();
+            pB = _B * dot + b0;
         }
 
         // Clamp projection B
         if (t1 < Zero || t1 > magB)
         {
-            double dot = _A.dot(pB - segA.first());
+            double dot = _A.dot(pB - a0);
 
             if (dot < Zero)
             {
@@ -128,7 +134,7 @@ double getMinDistance(const Segment3D& segA, const Segment3D& segB)
                 dot = magA;
             }
 
-            pA = _A * dot + segA.first();
+            pA = _A * dot + a0;
         }
     }
 
