@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <array>
+
 // ----------------------------------------------------------------------------------------------------
 
 class Point3D
@@ -9,6 +11,7 @@ class Point3D
 public:
     Point3D() = default;
     explicit Point3D(double x, double y, double z);
+    explicit Point3D(const std::array<double, 3>& coords);
 
     double x() const;
     double y() const;
@@ -24,6 +27,11 @@ private:
 
 inline Point3D::Point3D(double x, double y, double z)
     : m_x(x), m_y(y), m_z(z)
+{
+}
+
+inline Point3D::Point3D(const std::array<double, 3>& coords)
+    : m_x(coords[0]), m_y(coords[1]), m_z(coords[2])
 {
 }
 

@@ -17,7 +17,7 @@ public:
     explicit Vector3D(const Point3D& first, const Point3D& second);
     explicit Vector3D(const Vector3D& first, const Vector3D& second);
 
-    double operator[](unsigned int index) const;
+    double operator[](std::uint32_t index) const;
 
     Vector3D operator*(double scalar) const;
     Vector3D operator/(double scalar) const;
@@ -59,7 +59,7 @@ inline Vector3D::Vector3D(const Vector3D& first, const Vector3D& second)
 {
 }
 
-inline double Vector3D::operator[](unsigned int index) const
+inline double Vector3D::operator[](std::uint32_t index) const
 {
     switch (index)
     {
