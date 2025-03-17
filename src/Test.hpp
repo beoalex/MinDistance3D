@@ -49,19 +49,17 @@ public:
         runOne({ 0, 0, 0 }, { 5, 0, 0 }, { 5, 0, 0 }, { 10, 0, 0 }, 0.0, __func__);
     }
 
-    // Diagnostics
     std::uint32_t failCount() const;
 
 private:
+    using Coords = std::array<double, 3>;
+
     std::uint32_t m_failCount = 0;
 
     void runOne(
-        const std::array<double, 3>& segA_first,
-        const std::array<double, 3>& segA_second,
-        const std::array<double, 3>& segB_first,
-        const std::array<double, 3>& segB_second,
-        double expected,
-        const char* testName);
+        const Coords& segA_first, const Coords& segA_second,
+        const Coords& segB_first, const Coords& segB_second,
+        double expected, const char* testName);
 };
 
 // ----------------------------------------------------------------------------------------------------
@@ -72,12 +70,9 @@ inline std::uint32_t Test::failCount() const
 }
 
 inline void Test::runOne(
-    const std::array<double, 3>& segA_first,
-    const std::array<double, 3>& segA_second,
-    const std::array<double, 3>& segB_first,
-    const std::array<double, 3>& segB_second,
-    double expected,
-    const char* testName)
+    const Coords& segA_first, const Coords& segA_second,
+    const Coords& segB_first, const Coords& segB_second,
+    double expected, const char* testName)
 {
     const Segment3D segA{ Point3D(segA_first), Point3D(segA_second) };
     const Segment3D segB{ Point3D(segB_first), Point3D(segB_second) };
