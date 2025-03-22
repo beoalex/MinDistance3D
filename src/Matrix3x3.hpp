@@ -14,7 +14,7 @@
 class Matrix3x3
 {
 public:
-    static inline double determinant(const Vector3D& vec0, const Vector3D& vec1, const Vector3D& vec2)
+    static double determinant(const Vector3D& vec0, const Vector3D& vec1, const Vector3D& vec2)
     {
         return (  vec0[0] * (vec1[1] * vec2[2] - vec1[2] * vec2[1])
                 - vec0[1] * (vec1[0] * vec2[2] - vec1[2] * vec2[0])
